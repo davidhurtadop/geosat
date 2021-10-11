@@ -1,0 +1,13 @@
+CREATE DATABASE geosat
+    WITH 
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+
+COMMENT ON DATABASE geosat
+    IS 'geosat DB';
+
+GRANT ALL ON DATABASE geosat TO postgres WITH GRANT OPTION;
+
+GRANT ALL ON DATABASE geosat TO PUBLIC;
