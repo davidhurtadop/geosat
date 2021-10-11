@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model building {
+  id            String        @id(map: "PK_BUILDING") @db.Uuid 
+  totalArea     Decimal       @db.Decimal(10, 2)
+  floors        Decimal       @db.Decimal(3, 0)
+  buildingType  String        @db.Uuid
+  address       String        @db.VarChar(500)
+  landId        String?       @db.Uuid
+  creationDate  DateTime?     @db.Date
+  deleteDate    DateTime?     @db.Date
+  status        String?       @db.VarChar(1)
+  building_type building_type @relation(fields: [buildingType], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_building_building_type")
+  land          land?         @relation(fields: [landId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_building_land")
+}
+
+model building_type {
+  id       String     @id(map: "PK_BUILDING_TYPE") @db.Uuid 
+  name     String     @db.VarChar(200)
+  building building[]
+}
+
+model document_type {
+  id    String  @id(map: "PK_DOCUMENT_TYPE") @db.Uuid 
+  name  String  @db.VarChar(200)
+  owner owner[]
+}
+
+model ground {
+  id                String      @id(map: "PK_GROUND") @db.Uuid 
+  totalArea         Decimal     @db.Decimal(10, 2)
+  value             Decimal     @db.Decimal(50, 2)
+  groundType        String      @db.Uuid
+  isNearWaterSource Boolean
+  landId            String?     @unique @db.Uuid
+  hasBuildings      Boolean
+  creationDate      DateTime?   @db.Date
+  deleteDate        DateTime?   @db.Date
+  status            String?     @db.VarChar(1)
+  ground_type       ground_type @relation(fields: [groundType], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ground_ground_type")
+  land              land?       @relation(fields: [landId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ground_land")
+}
+
+model ground_type {
+  id     String   @id(map: "PK_ground_TYPE") @db.Uuid 
+  name   String   @db.VarChar(200)
+  ground ground[]
+}
+
+model land {
+  id                                   String     @id(map: "PK_LAND") @db.Uuid 
+  predialNumber                        String     @db.VarChar(200)
+  value                                Decimal    @db.Decimal(50, 0)
+  name                                 String     @db.VarChar(500)
+  departmentId                         String     @db.Uuid
+  cityId                               String     @db.Uuid
+  ownerId                              String?    @db.VarChar(50)
+  creationDate                         DateTime?  @db.Date
+  deleteDate                           DateTime?  @db.Date
+  status                               String?    @db.VarChar(1)
+  location_land_cityIdTolocation       location   @relation("land_cityIdTolocation", fields: [cityId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_land_location_02")
+  location_land_departmentIdTolocation location   @relation("land_departmentIdTolocation", fields: [departmentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_land_location_01")
+  building                             building[]
+  ground                               ground?
+}
+
+model location {
+  id                               String        @id(map: "PK_LOCATION") @db.Uuid 
+  name                             String        @db.VarChar(300)
+  locationType                     String        @db.Uuid
+  fatherId                         String?       @db.Uuid
+  location                         location?     @relation("locationTolocation_fatherId", fields: [fatherId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_location")
+  location_type                    location_type @relation(fields: [locationType], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_location_type")
+  land_land_cityIdTolocation       land[]        @relation("land_cityIdTolocation")
+  land_land_departmentIdTolocation land[]        @relation("land_departmentIdTolocation")
+  other_location                   location[]    @relation("locationTolocation_fatherId")
+}
+
+model location_type {
+  id       String     @id(map: "PK_LOCATION_TYPE") @db.Uuid 
+  name     String     @db.VarChar(200)
+  location location[]
+}
+
+model owner {
+  id            String        @id(map: "PK_OWNER") @db.Uuid 
+  firstName     String        @db.VarChar(200)
+  lastName      String        @db.VarChar(200)
+  ownerType     String        @db.Uuid
+  documentType  String        @db.Uuid
+  document      String        @db.VarChar(50)
+  address       String        @db.VarChar(500)
+  phoneNumber   String        @db.VarChar(20)
+  email         String?       @db.VarChar(200)
+  businessName  String?       @db.VarChar(500)
+  document_type document_type @relation(fields: [documentType], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_owner_document_type")
+  owner_type    owner_type    @relation(fields: [ownerType], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_owner_owner_type")
+}
+
+model owner_type {
+  id    String  @id(map: "PK_OWNER_TYPE") @db.Uuid 
+  name  String  @db.VarChar(200)
+  owner owner[]
+}
